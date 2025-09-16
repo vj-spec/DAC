@@ -1,61 +1,76 @@
-# DAC
-INTERFACING DAC WITH 8086 KIT AND GENERATING SAWTOOTH AND SQUARE WAVEFORMS
-AIM
-To write an assembly language program in 8086 to generate Sawtooth and Square waveforms using DAC.
+# STEPPER MOTOR INTERFACING
 
-APPARATUS REQUIRED
-S. No	Item	Specification	Quantity
-1	Microprocessor kit	8086	1
-2	Power Supply	+5 V DC, +12 V DC	1
-3	DAC Interface board	-	1
-ALGORITHM
-Measurement of Analog Voltage
-Send the digital value to DAC.
-Read the corresponding analog value at its output.
-Waveform Generation
-Square Waveform
-Send low value (00) to the DAC.
-Introduce suitable delay.
-Send high value to DAC.
-Introduce delay.
-Repeat the above procedure.
-Sawtooth Waveform
-Load low value (00) to accumulator.
-Send this value to DAC.
-Increment the accumulator.
-Repeat step (ii) and (iii) until accumulator value reaches FF.
-Repeat the above procedure from step 1.
-PROGRAMS
-8086 Assembly Programs – DAC Interfacing
-Program: Square Wave
-Memory Location	Program	Comments
-1000	MOV AL,00H	Load 00H in Accumulator
-1003	OUT 0C8H,AL	Send through output port
-1005	CALL DELAY(1100)	CALL PROGRAM TO 1100
-1008	MOV AL,0FFH	Load 00H in Accumulator
-100A	OUT 0C8H,AL	Send through output port
-100D	CALL DELAY(1100)	CALL PROGRAM TO 1100
-Memory Location	Program	Comments
-1100	MOV CX,0505	Load 0505H in Accumulator
-1103	DEC CX	Decrement CX
-1105	JNZ 1104	RPEAT UNTILL ZERO
-1108	RET	RETURN TO MAIN PROGRAM
-Program: Sawtooth wave
-Assembly Program
-Memory Location	Program Instruction	Comments
-1000	START: MOV AL,00H	Load 00H in accumulator
-1003	LOOP : OUT 0C8H,AL	Send through output port
-1005	INC AL	Increment contents of accumulator
-1007	JNC LOOP	Jump if no carry (continue loop)
-1009	JMP START	Go to starting location
-Tabulation
-Waveform	Amplitude	Time period
-Sawtooth		
-Square		
-Model Graph
-(Insert graph/diagram here if available)
+## AIM
+To write an assembly language program in 8086 to rotate the motor at different speeds.
 
-OUTPUT IMAGE OF DAC(SAWTOOTH WAVE FROM DSO AND SQUARE WAVE FROM DSO)
-Result
-Thus, the DAC was interfaced with 8086 and different waveforms were successfully generated.
+---
 
+## APPARATUS REQUIRED
+
+| S. No | Item                        | Specification   | Quantity |
+|-------|-----------------------------|-----------------|----------|
+| 1     | Microprocessor kit          | 8086            | 1        |
+| 2     | Power Supply                | +5 V DC, +12 V DC | 1      |
+| 3     | Stepper Motor Interface board | -             | 1        |
+| 4     | Stepper Motor               | -               | 1        |
+
+---
+
+## THEORY
+A motor in which the rotor is able to assume only discrete stationary angular positions is a **stepper motor**. The rotary motion occurs in a stepwise manner from one equilibrium position to the next.  
+
+**Two-phase scheme:** Any two adjacent stator windings are energized. There are two magnetic fields active in quadrature and none of the rotor pole faces can be in direct alignment with the stator poles. A partial but symmetric alignment of the rotor poles is of course possible.
+
+---
+
+## ALGORITHM
+For running the stepper motor in clockwise and anticlockwise directions:
+
+1. Get the first data from the lookup table.  
+2. Initialize the counter and move data into the accumulator.  
+3. Drive the stepper motor circuitry and introduce delay.  
+4. Decrement the counter. If not zero, repeat from step (iii).  
+5. Repeat the above procedure both for backward and forward directions.  
+
+---
+
+## SWITCHING SEQUENCE OF STEPPER MOTOR
+
+| Memory Location | A1 | A2 | B1 | B2 | Hex Code |
+|-----------------|----|----|----|----|----------|
+| 1200            | 1  | 0  | 0  | 0  | 09H      |
+| 1201            | 0  | 1  | 0  | 1  | 05H      |
+| 1202            | 0  | 1  | 1  | 0  | 06H      |
+| 1203            | 1  | 0  | 1  | 0  | 0AH      |
+
+---
+
+## PROGRAM
+
+```asm
+; Stepper Motor Interfacing Program in 8086 Assembly
+
+START:   MOV DI, 1200H        ; Initialize memory location to store array
+         MOV CX, 0004H        ; Initialize array size
+
+DOWN1:   MOV AL, [DI]         ; Copy the first data into AL
+         OUT C0, AL           ; Send it through port address
+
+         MOV DX, 1010H        ; Delay subroutine
+L1:      DEC DX
+         JNZ L1
+
+         INC DI               ; Go to next memory location
+         LOOP DOWN1           ; Repeat until all data is sent
+
+         JMP START            ; Continuous rotation
+
+         HLT                  ; Stop
+
+DATA:    DB 09H, 05H, 06H, 0AH ; Array of data
+```
+## OUTPUT OF THE PROGRAM:
+
+## RESULT
+
+Thus, the assembly language program for rotating the stepper motor in both clockwise and anticlockwise directions was written and verified.
